@@ -27,7 +27,7 @@ def data_split(array_gen):
 	Y_shuf_valid=array_gen[i:i+j,-1]
 	X_shuf_test=array_gen[i+j:i+2*j,:-1]
 	Y_shuf_test=array_gen[i+j:i+2*j,-1]
-	return X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid
+	return X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid,X_shuf_test,Y_shuf_test
 
 #data_split(X_shuf_train)
 ###pending- randomising data#######################################
@@ -37,14 +37,12 @@ This code creates a design matrix phi(c,k) which constructs the matrix in the fo
 phi = [1 t t**2...]
 ''' 
 def Phi(c,k):
-	c1=c
-	k1=k
 	x=np.arange(0,1,0.05)
-	phi_values=x[-c1:]
-	phi_matrix=phi_values.reshape(1,c1)
-	for i in range(k1):
+	phi_values=x[-c:]
+	phi_matrix=phi_values.reshape(1,c)
+	for i in range(k):
 		if i>1:
-			phi_values=(phi_values**i).reshape(1,c1)
+			phi_values=(phi_values**i).reshape(1,c)
 			phi_matrix=np.concatenate([phi_matrix,phi_values],axis=0)
 	phi_matrix=np.matrix.transpose(phi_matrix)		
 	
@@ -57,7 +55,7 @@ def make_vv(c, k):
 		for j in range(1,k+1,1):
 			x=Phi(c=i,k=j)
 			x_transpose=np.matrix.transpose(x)
-			v=np.linalg.pinv(x_transpose.dot(x)).dot(x_transpose)
+			v=np.linalg.pinv(x_transpose.dot(x)).dot(x_transpose) #least square solution for v matrix
 			
 	return v
 
@@ -65,7 +63,7 @@ def make_vv(c, k):
 
 def vv_least_squares(c,k):
 	v=make_vv(c, k)
-	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid=data_split(array_gen)
+	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid,X_shuf_test,Y_shuf_test=data_split(array_gen)
 	y_initial=X_shuf_train[0]
 	quartic_vv=np.dot(v,y_initial[-c:])
 	quartic_lstsq=np.linalg.lstsq(Phi(c=c,k=k),y_initial[-c:],rcond=None)[0]
@@ -87,18 +85,15 @@ Weight matrix with with vv: [-1.87375781e-05 -1.78006992e-05 -1.69106643e-05 -1.
 
 ############################### Question 3c (i) ####################################
 def min_leastsquare_inv(c,k):
-	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid=data_split(array_gen)
+	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid,X_shuf_test,Y_shuf_test=data_split(array_gen)
 	y_expected=Y_shuf_train[1]
 	y_predicted=0
-	min_squareerror=1000 #A random value for error comparison to get the least value
+	min_squareerror=1000 #A random value for error comparison to get the least value. Can be any value. Should be large
 	y_initial=X_shuf_train[1]
 	c3=0
 	k3=0
 	for i in range(1,c+1,1):
 		for j in range(1,k+1,1):
-			#x=Phi(c=c2,k=k2)
-			#x_transpose=np.matrix.transpose(x)
-			#w=np.linalg.pinv(x_transpose.dot(x)).dot(x_transpose).dot(y)
 			v=make_vv(c=i, k=j)
 			w=np.dot(v,y_initial[-i:])
 			y_predicted=np.dot([np.ones((w.shape[0]))],w)
@@ -109,17 +104,18 @@ def min_leastsquare_inv(c,k):
 				k3=j
 	print("Minimum square error with v:",min_squareerror,"Value for k:",k3,"Value for c:",c3)
 #min_leastsquare_inv(c=1,k=10)
-#Result: Minimum square error with v: [-0.0001014] Value for k: 6 Value for c: 1	
-
+'''
+Result: Minimum square error with v: [-0.0001014] Value for k: 6 Value for c: 1	
+'''
 ################################ Question 3c (ii)####################################
 def min_leastsquare_data(c,k):
-	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid=data_split(array_gen)
+	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid,X_shuf_test,Y_shuf_test=data_split(array_gen)
 	y_predicted=0
 	mean_square_error=0
 	min_error=[]
-	for i in range(len(Y_shuf_train)):
-		y_expected=Y_shuf_train[i]
-		y_initial=X_shuf_train[i]
+	for i in range(len(Y_shuf_test)):
+		y_expected=Y_shuf_test[i]
+		y_initial=X_shuf_test[i]
 		for j in range(1,c+1,1):
 			y=y_initial[-j:]
 			for r in range(1,k+1,1):
@@ -127,37 +123,48 @@ def min_leastsquare_data(c,k):
 				w=np.dot(v,y)
 				y_predicted=np.dot([np.ones((w.shape[0]))],w)
 				min_error=y_expected-y_predicted
-	mean_square_error=np.sum(min_error)/len(Y_shuf_train)
+	mean_square_error=np.sum(min_error)/len(Y_shuf_test)
 
-	print("Minimum square error with inverse operation:",mean_square_error)
-min_leastsquare_data(c=1,k=4)
-######### Result : Pending ##############################################################
+	print("Mean square error with inverse operation:",mean_square_error)
+#min_leastsquare_data(c=1,k=4)
+'''
+Training data for C*k=1*4:
+Result : Mean square error with inverse operation: 4.952014950010723e-10 
+
+Validation data for C*k=1*4:
+Mean square error with inverse operation: -6.6993145829630385e-09
+
+Test data for C*k=1*4:
+Mean square error with inverse operation: 6.721897075015231e-10
+'''
 
 ####################### Question 4 (a) ##################################################
 
 #######################Question-4:Design minimum least square############################
-def min_leastsquare(c1,k1):
-	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid=data_split(array_gen)
-	y_expected=Y_shuf_train
+def min_leastsquare(c,k):
+	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid,X_shuf_test,Y_shuf_test=data_split(array_gen)
 	y_predicted=0
-	mean_square_error=0
-	y_initial=X_shuf_train
-	min_error=[]
+	min_squareerror=1000
 	c2=0
 	k2=0
 	for i in range(len(Y_shuf_train)):
 		y_initial=X_shuf_train[i]
 		y_expected=Y_shuf_train[i]
-		for c in range(1,c1+1,1):
-			y=y_initial[-c:]
-			for k in range(1,k1+1,1):
-				x=Phi(c=c1,k=k1)
+		for j in range(1,c+1,1):
+			y=y_initial[-j:]
+			for r in range(1,k+1,1):
+				x=Phi(c=j,k=r)
 				w=np.linalg.lstsq(x,y,rcond=None)[0]
 				y_predicted=np.matrix.transpose(np.dot([np.ones((w.shape[0]))],w))
 				min_error=y_expected-y_predicted
-	mean_square_error=np.sum(min_error)/len(Y_shuf_train)
-	print("y_expected:",y_expected,"y-predicted:",y_predicted)
-	print("Mean square error with least squares:",mean_square_error)
-	return c2,k2
+				if min_error<min_squareerror:
+					min_squareerror=min_error
+					c2=j
+					k2=r
+	print("y_expected:",y_expected,"y-predicted:",y_predicted,"Value of C:",c2,"Value of K",k2)
+	print("Least square error:",min_squareerror,"at Value of C:",c2,"Value of K",k2)
+	#print("Mean square error with least squares:",mean_square_error)
+
+min_leastsquare(c=10,k=20)
 
 ################################## Result pending ####################################
