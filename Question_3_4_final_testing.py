@@ -147,7 +147,7 @@ def min_leastsquare(c,k):
 	min_squareerror=1000
 	c2=0
 	k2=0
-	for i in range(1,3,1):#range(len(Y_shuf_valid)):
+	for i in range(len(Y_shuf_valid)):
 		y_initial=X_shuf_valid[i]
 		y_expected=Y_shuf_valid[i]
 		for j in range(1,c+1,1):
@@ -181,7 +181,7 @@ def test_data_meanerror(c,k):
 	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid,X_shuf_test,Y_shuf_test=data_split(array_gen)
 	min_error=0
 	mean_square_error=0
-	for i in range(1,3,1):#range(len(Y_shuf_test)):
+	for i in range(len(Y_shuf_test)):
 		y_initial=X_shuf_test[i]
 		y_expected=Y_shuf_test[i]
 		x=Phi(c=c,k=k)
