@@ -161,18 +161,24 @@ def min_leastsquare(c,k):
 					min_squareerror=min_error
 					c2=j
 					k2=r
-	print("y_expected:",y_expected,"y-predicted:",y_predicted,"Value of C:",c2,"Value of K",k2)
-	print("Least square error:",min_squareerror,"at Value of C:",c2,"Value of K",k2)
+	print("y_expected:",y_expected,"y-predicted:",y_predicted,"Value of C:",c2,", Value of K",k2)
+	print("Least square error:",min_squareerror,"at Value of C:",c2,", Value of K",k2)
 	return (c2,k2)
 	#print("Mean square error with least squares:",mean_square_error)
 
 #min_leastsquare(c=10,k=20)
 
-################################## Result pending ####################################
+'''
+Result:
+Result on validation data:
+y_expected: -0.01226806640625 y-predicted: [-2.95059646] Value of C: 5 , Value of K 7
+Least square error: [-19.53224823] at Value of C: 5 , Value of K 7
+'''
 
-def test_data_meanerror():
+##################################  ####################################
+
+def test_data_meanerror(c,k):
 	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid,X_shuf_test,Y_shuf_test=data_split(array_gen)
-	c,k=min_leastsquare(c=10,k=20)
 	min_error=0
 	mean_square_error=0
 	for i in range(len(Y_shuf_test)):
@@ -185,21 +191,20 @@ def test_data_meanerror():
 		min_error+=(y_expected-y_predicted)
 	mean_square_error=min_error/len(Y_shuf_test)
 	print("Mean square error for the best validation fit on test data with least squares:",mean_square_error)
+	return y_predicted
 #test_data_meanerror()
+
+'''
+
+Mean square error for the best validation fit on test data with least squares: [-0.00068315]
+'''
 		
 ################################# Plot Histogram #########################################
 
 def plot_histogram():
 	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid,X_shuf_test,Y_shuf_test=data_split(array_gen)
-	c,k=min_leastsquare(c=10,k=20)
-	test_data_meanerror()
-	for i in range(len(Y_shuf_test)):
-		y_initial=X_shuf_test[i]
-		y_expected=Y_shuf_test[i]
-		x=Phi(c=c,k=k)
-		y=y_initial[-c:]
-		w=np.linalg.lstsq(x,y,rcond=None)[0]
-		y_predicted=np.matrix.transpose(np.dot([np.ones((w.shape[0]))],w))
+	c,k=min_leastsquare(c=5,k=10)
+	y_predicted=test_data_meanerror(c=c,k=k)
 	plt.hist(y_predicted,bins=10)
 	plt.show()
-test_data_meanerror()	
+plot_histogram()	
