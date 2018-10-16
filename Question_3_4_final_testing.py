@@ -112,7 +112,7 @@ def min_leastsquare_data(c,k):
 	X_shuf_train,Y_shuf_train,X_shuf_valid,Y_shuf_valid,X_shuf_test,Y_shuf_test=data_split(array_gen)
 	y_predicted=0
 	mean_square_error=0
-	min_error=[]
+	min_error=0
 	for i in range(len(Y_shuf_test)):
 		y_expected=Y_shuf_test[i]
 		y_initial=X_shuf_test[i]
@@ -122,8 +122,8 @@ def min_leastsquare_data(c,k):
 				v=make_vv(c=j, k=r)
 				w=np.dot(v,y)
 				y_predicted=np.dot([np.ones((w.shape[0]))],w)
-				min_error=y_expected-y_predicted
-	mean_square_error=np.sum(min_error)/len(Y_shuf_test)
+				min_error+=y_expected-y_predicted
+	mean_square_error=min_error/len(Y_shuf_test)
 
 	print("Mean square error with inverse operation:",mean_square_error)
 #min_leastsquare_data(c=1,k=4)
